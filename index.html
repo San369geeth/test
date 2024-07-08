@@ -5,16 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Translation System</title>
-    <link rel="stylesheet" href="test.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
         rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
     <div id="header">
-        <img id="logo" src="logo.png" alt="logo">
+        <img id="logo" src="images/logo.png" alt="CulturaCast logo">
         <h1>CulturaCast</h1>
         <div>
             <ul class="navbar">
@@ -25,27 +26,23 @@
                 <li><a href="#uses">Uses</a></li>
             </ul>
         </div>
-
     </div>
 
-
-    <br><br>
-    <div class="intro">
-        <h2 class="quote">Make Your Video Speak <br>Different Language</h2>
-        <img src="landing.jpg" alt="landing" class="landingimg">
-        <p>
-            Make videos accessible to everyone with video translations. <br> Copy the transcribed subtitles of your
-            video. <br> It’s quick, easy, and completely online.
-        </p>
-        <br><br>
-        <a href="#form" class="button">Get Started</a>
-
+    <div class="hero-section">
+        <img src="images/landing.jpg" alt="Intro Image" class="intro-image">
+        <div class="hero-content">
+            <h1>Make Your Video Speak Different Language</h1>
+            <p>Make videos accessible to everyone with video translations. Copy the transcribed subtitles of your video.
+                It's quick, easy, and completely online.</p>
+            <a href="#uploadForm"><button class="get-started-button">Get Started</button></a>
+        </div>
     </div>
+
 
     <div class="container">
-        <h2 id="formh2">Upload the video here</h2>
-        <div id="form">
-            <form action="/upload" method="post" enctype="multipart/form-data">
+        <h2 id="formh2">Upload <br> the video here</h2>
+        <div class="form-section">
+            <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm" class="upload-form">
                 <label for="video">Select a video file:</label>
                 <input class="fileupload" type="file" id="video" name="video" accept="video/*" style="font-size: 16px;">
                 <h3 style="margin-left: 100px;">OR</h3>
@@ -63,38 +60,104 @@
                     <option value="ja">Japanese</option>
                     <option value="ml">Malayalam</option>
                 </select>
-                <button class="button-50" type="submit">Upload</button>
+                <button class="button-50" type="submit" id="submitBtn">Upload</button>
             </form>
+            <div id="loading" style="display: none;">
+                <div id="progress-box">
+                    <p>Loading... Please wait</p>
+                    <div id="progress-container">
+                        <div id="progress-bar"></div>
+                    </div>
+                    <span id="progress-text"></span>
+                </div>
+            </div>
         </div>
-        <img id="formimg" src="img.jpg" alt="watching">
+        <img src="images/img.jpg" alt="Form Image" class="form-image">
     </div>
 
     <section id="how-it-works">
         <h2>How It Works</h2>
-        <a href="#formh2"><img src="Designer.png" alt="1image" id="img1"></a>
-        <p>Upload your video file or provide a YouTube URL. Select the languages you want to translate into,
-            customize settings, review and edit translations, then download or share your translated video.</p>
+        <a href="#formh2"><img src="images/Designer.png" alt="Designer illustration" id="img1"></a>
+        <p>Upload your video file or provide a YouTube URL. Select the languages you want to translate into, customize
+            settings, review and edit translations, then download or share your translated video.</p>
     </section>
     <section id="services">
-        <h2 style="margin-left: 600px;">Services</h2>
-        <a href="#formh2"><img src="services.jpg" alt="1image" id="img1"></a>
-        <p>You can upload either local video file or Paste a Youtube Url, <br>also we provide subtitles in the required
-            language. </p>
+        <h2>Services</h2>
+        <a href="#formh2"><img src="images/services.jpg" alt="Services illustration" id="img1"></a>
+        <p>You can upload either a local video file or paste a YouTube URL, <br>and we provide subtitles in the required
+            language.</p>
     </section>
     <section id="uses">
         <h2>Uses for Students, Teachers, and More</h2>
-        <a href="#formh2"><img src="creators.jpg" alt="1image" id="img1"></a>
+        <a href="#formh2"><img src="images/creators.jpg" alt="Creators illustration" id="img1"></a>
         <p>Students can access educational content in their preferred language, while teachers can reach a diverse
-            audience with their instructional videos. Our project promotes inclusivity and accessibility in
-            education.</p>
+            audience with their instructional videos. Our project promotes inclusivity and accessibility in education.
+        </p>
     </section>
     <section id="about-us">
-        <h2 style="margin-left: 600px;">About Us</h2>
-        <a href="#formh2"><img src="student.jpg" alt="1image" id="img1"></a>
-        <p>We are passionate about breaking down language barriers and fostering global communication through
-            innovative technology. Our dedicated team is committed to providing seamless and accurate translation
-            solutions tailored to the needs of our users.</p>
+        <h2>About Us</h2>
+        <a href="#formh2"><img src="images/student.jpg" alt="Student illustration" id="img1"></a>
+        <p>We are passionate about breaking down language barriers and fostering global communication through innovative
+            technology. Our dedicated team is committed to providing seamless and accurate translation solutions
+            tailored to the needs of our users.</p>
     </section>
+
+    <script>
+        const socket = io();
+
+        document.getElementById('uploadForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('submitBtn').disabled = true; // Disable the submit button
+            const formData = new FormData(this);
+            const socketId = socket.id;
+            formData.append('socketId', socketId);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    socket.on('progress', (data) => {
+                        const messageElement = document.getElementById('progress-text');
+                        const progressBar = document.getElementById('progress-bar');
+
+                        if (messageElement) {
+                            messageElement.innerText = data.message;
+                        } else {
+                            console.error('Element with id "progress-text" not found.');
+                        }
+
+                        // Update progress bar width based on known stages
+                        if (data.message.includes("Extracting audio")) {
+                            progressBar.style.width = '20%';
+                        } else if (data.message.includes("Converting audio to text")) {
+                            progressBar.style.width = '40%';
+                        } else if (data.message.includes("Translating text")) {
+                            progressBar.style.width = '60%';
+                        } else if (data.message.includes("Converting text to speech")) {
+                            progressBar.style.width = '80%';
+                        } else if (data.message.includes("Merging audio with video")) {
+                            progressBar.style.width = '100%';
+                        }
+                    });
+
+                    socket.on('completed', () => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('submitBtn').disabled = false; // Re-enable the submit button
+                        window.location.href = '/out.html';
+                    });
+                } else {
+                    document.getElementById('loading').innerText = 'Upload failed. Please try again.';
+                    document.getElementById('submitBtn').disabled = false; // Re-enable the submit button
+                }
+            }).catch(error => {
+                document.getElementById('loading').innerText = 'An error occurred. Please try again.';
+                document.getElementById('submitBtn').disabled = false; // Re-enable the submit button
+            });
+        });
+
+
+    </script>
 </body>
 
 </html>
