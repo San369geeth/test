@@ -62,18 +62,20 @@ ul {
     align-items: center;
     justify-content: center;
     padding: 20px;
+    flex-wrap: wrap;
 }
 
 .intro-image {
     border-radius: 10px;
-    width: 500px;
-    /* max-width: 600px; */
-    height: 500px;
-    margin-right: 20px;
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    margin: 20px 0;
 }
 
 .hero-content {
     max-width: 500px;
+    text-align: center;
 }
 
 .hero-content h1 {
@@ -106,12 +108,15 @@ ul {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
 }
 
 .container h2 {
     margin-bottom: 20px;
+    text-align: center;
+    width: 100%;
 }
 
 .form-section {
@@ -119,18 +124,20 @@ ul {
     align-items: center;
     justify-content: center;
     padding: 20px;
+    flex-wrap: wrap;
 }
 
 .upload-form {
-    width: 50%;
+    width: 100%;
     max-width: 400px;
     margin-right: 20px;
 }
 
 .form-image {
-    width: 50%;
+    width: 100%;
     max-width: 400px;
     height: auto;
+    margin-top: 20px;
 }
 
 form {
@@ -150,7 +157,7 @@ form button {
     border-radius: 5px;
     border: 1px solid #ccc;
     font-size: 16px;
-    width: 300px;
+    width: 100%;
 }
 
 form button {
@@ -263,6 +270,7 @@ section h2 {
     color: #4C3C62;
     width: 100%;
     position: relative;
+    text-align: center;
 }
 
 section h2::after {
@@ -272,13 +280,15 @@ section h2::after {
     background-color: blueviolet;
     position: absolute;
     bottom: -10px;
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 section p {
     font-size: 18px;
     line-height: 1.6;
     width: 100%;
+    text-align: center;
 }
 
 section img {
