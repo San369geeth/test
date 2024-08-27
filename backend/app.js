@@ -16,11 +16,17 @@ const PORT = process.env.PORT || 3000;
 const upload = multer({ dest: 'uploads/' });
 
 app.use(body_parser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname)));
+//app.use(express.static(path.join(__dirname)));
 
+//app.get('/', (req, res) => {
+    //res.sendFile(path.join(__dirname, 'index.html'));
+//});
+app.use(express.static(path.join(__dirname, '..')));
+
+// Route to serve the index.html
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
+})
 
 const sanitizeFilename = (filename) => {
     return filename.replace(/[^a-z0-9]/gi, '_').toLowerCase();
