@@ -1,0 +1,10 @@
+subprocess
+sys
+socketio
+threading
+os
+moviepy
+whisper
+googletrans
+gtts
+pydub
