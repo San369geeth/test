@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "culturacast-12b35",
+  "private_key_id": "3d23cdda92d0d2e3a58850814472d1f3d9aec329",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDM7czXLujg2qpm\n2izfxzeRxLCV7kXzM/HOWm7OcmCoSn/1V4gePAzDIvtPHUKg6E5XCkBhoTckIFW5\nBup4xMRVHywLkSSBo+IBPKzvTUoIh92viAw6xb3aXr1nLgTBe0U4xo1Cnu/TKjLe\n/Hqg+j8ZCAtgsJ2Fonu6eAA7mUprRnlHX7yXS9Q+tlMMH1pjnET8QIMxZKQtraqe\nWflmKsA+DKYw4i/0t6CqQuNzPHNKI8fkuJZy98wXQa4DYpKgbltRnT1ruxFkF2ha\nosraq5dkiO7OLd+e7xDnm2IBGO5oQkEbMKrfqWhrIdzFinWqZO6hh95MpBtAd1EH\nME/Klab9AgMBAAECggEAGzF5C5rhcykBEKnl54H/iTvQ9OxL4vRjI29TodiCpAJS\nzYMigGSWivRi5cIru79n2dv15B6o+wXBak6VIZZ2uRbsWNKXRg6xqFldV1npt40T\n6T2D5e6kfUwyFPWB0wzhCCIsz4jYqSxB2N4nBaJ/afprzBZTqM6BXaKb4Uy7l9Vi\n474U1N9mJaDjtFRob8i2R3zTFEWWnLIa42wkCdevU9h2Kv5wiSeJvAVOJENWMORw\nCmW0Cf1nrNUrXacSlz19OjYELidNu/jXqKNdByXx1V3T4rae4xI5Rbko92j4ENS+\nG5yk7SJiTK4Ddf0n+qt5y7LBvvB1KQ3jCG7/X0G/LwKBgQDskeVtL5RJ4c93O0rf\nYD/gwa9qtFMTICBTqW+h8BTDdgWi6nYyJdYNZZXrn9t+8cwsvGwJagZORqy+F7fu\nZAM7wrT3scN6pdHyX2yca7JXjugEdXLifl9cYxqFFVe4QHsTbQHXeTxwf8rLoQ7N\nEwtgfb5M/Xm5XEn2RKK63bnQGwKBgQDdwp9Peuc2nQtSSzJkT7stXecq+OQW9D6X\nxsWXLa2+3AV7Tmkt59d3haRpa+wtwWZIT7zTdSQiGK2KcPlzybqiSFqjiZ38SxEe\nJ/wgYH3KYsoie2R4WGpAQdhQqmf9AlMu6AT60qvr84Owg9scAS15YamlCoMeIG7/\nK+/ki5DGxwKBgQDhdKHMDv4p81R/cziF7fqyvqPo83YA0is80Eudb2q6ZS4193Ex\nlbGMDvZ0GmNbdiF5uRDVYAAmdWCHwZ7/SL10JLnHHdkIeCO/84VVBaZvn7grF6un\ng3xqVeCeWJrC9GDXQJnyuo4JQSEKM7Ihazb6fJvyT9fD+dpbI0pbAJjnZQKBgGFr\n2b75+E9myI17mYS1/j3c7exT8SggXssguLdEivq4//N+q/hNzLumS2dA0T38o6mK\n1iJzaM9N1hdmsD/s1H/sl10W3P/0Hm4IFNxIZ5qcsb5aRPYVqX/XLWeqpQpilhaa\nOW3TVVHP5f+KvZxc7BRSEkv+BUIb74dMTxQxOAYLAoGACBYCL2N/7iCkNXJMTZKq\nDdotT0NctjPcbgEIvoRLMOzSYRBDZvIJynG+mAqy//I1IBT21eg+XlX0btfxt2wb\nopBMlXX718rwWK25+8zeE/LxqGfN3aDo+403g/cLFotZiRH6DZ/wwQvVxPUGYLc1\nT/Cs3/Q1DGrriYdHnb13QnY=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-jwgo7@culturacast-12b35.iam.gserviceaccount.com",
+  "client_id": "109787145142916335711",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-jwgo7%40culturacast-12b35.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
