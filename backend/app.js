@@ -15,7 +15,7 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require('./cultura.json'); // Replace with the path to your service account key
+const serviceAccount = require('/etc/secrets/culturacast.json'); // Replace with the path to your service account key
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
