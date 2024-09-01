@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translated Video Player</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        body {
+            background-color: #f8f9fa;
+            /* Light gray background */
+        }
+
+        .container {
+            background-color: #ffffff;
+            /* White background for container */
+            padding: 20px;
+            /* Add some padding */
+            border-radius: 10px;
+            /* Rounded corners */
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            /* Drop shadow */
+        }
+
+        h1 {
+            text-align: center;
+            /* Center align the heading */
+        }
+
+        .btn-primary {
+            background-color: #7d28a7;
+            border-color: #7d28a7;
+        }
+
+        .btn-primary:hover {
+            background-color: #88217c;
+            border-color: #7e1e7b;
+        }
+
+        /* Resize the video element */
+        video {
+            width: 600px;
+            height: 700px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #cd34db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+            /* Hide the loader by default */
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .button-50 {
+            appearance: button;
+            background-color: rgb(160, 34, 160);
+
+            background-image: none;
+            border: 1px solid violet;
+
+            border-radius: 4px;
+            box-sizing: border-box;
+            color: black;
+
+            cursor: pointer;
+            display: inline-block;
+            font-family: ITCAvantGardeStd-Bk, Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 20px;
+            margin: 0 5px 10px 0;
+            overflow: visible;
+            padding: 12px 40px;
+            text-align: center;
+            text-transform: none;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            vertical-align: middle;
+            white-space: nowrap;
+            margin-left: 1200px;
+        }
+
+
+        .button-50:focus {
+            text-decoration: none;
+        }
+
+        .button-50:hover {
+            text-decoration: none;
+        }
+
+        .button-50:active {
+            box-shadow: rgba(0, 0, 0, .125) 0 3px 5px inset;
+            outline: 0;
+        }
+
+        .button-50:not([disabled]):active {
+            box-shadow: #fff 2px 2px 0 0, #000 2px 2px 0 1px;
+            transform: translate(2px, 2px);
+        }
+
+        @media (min-width: 768px) {
+            .button-50 {
+                padding: 12px 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 id="text">Giving a final Touch...</h1>
+        <div class="loader"></div>
+        <button onclick="fetchAndDisplayVideo()" class="btn btn-primary btn-lg btn-block mt-4" id="getTranslatedVideo"
+            style="display: none;">Get Translated
+            Video</button>
+        <div id="videoContainer" class="mt-4"></div>
+        <div id="textContainer" class="mt-4">
+        </div>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            // Show the loading spinner
+            document.querySelector('.loader').style.display = 'block';
+
+            setTimeout(() => {
+                document.querySelector('.loader').style.display = 'none';
+                document.getElementById('getTranslatedVideo').style.display = 'inline-block';
+            }, 3000);
+        }, 0); // Show the loading spinner immediately
+
+
+        // Function to fetch and display the translated video
+        function fetchAndDisplayVideo() {
+            // Function to fetch and display the translated video
+            document.getElementById("text").innerText = "Translated Video";
+            document.getElementById('getTranslatedVideo').style.display = 'none'
+            fetch('/translated-video')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => { // Fix the variable name to "blob"
+                    const url = URL.createObjectURL(blob);
+                    const videoElement = document.createElement('video');
+                    videoElement.src = url;
+                    videoElement.setAttribute('controls', '');
+                    videoElement.className = 'w-100'; // Bootstrap class to make the video responsive
+                    document.getElementById('videoContainer').innerHTML = ''; // Clear previous content
+                    document.getElementById('videoContainer').appendChild(videoElement);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+
+
+
+            fetch('/translated-text')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(translatedText => {
+                    // Display translated text in a <div> element
+                    const translatedTextElement = document.createElement('div');
+                    translatedTextElement.textContent = translatedText;
+                    document.getElementById('textContainer').innerHTML = ''; // Clear previous content
+                    document.getElementById('textContainer').appendChild(translatedTextElement);
+
+                    // Create a new button element
+                    const button = document.createElement("button");
+
+                    // Set the button's text content
+                    button.textContent = "Copy";
+
+                    // Set any other attributes or styles if needed
+                    button.setAttribute("class", "button-50");
+
+                    // Add an event listener to handle button click
+                    button.addEventListener("click", function () {
+                        // Create a temporary textarea element
+                        const tempTextarea = document.createElement('textarea');
+                        // Set its value to the translated text
+                        tempTextarea.value = translatedText;
+                        // Append the textarea to the body (necessary for select and execCommand)
+                        document.body.appendChild(tempTextarea);
+                        // Select the text inside the textarea
+                        tempTextarea.select();
+                        // Execute the copy command
+                        document.execCommand("copy");
+                        // Remove the temporary textarea
+                        document.body.removeChild(tempTextarea);
+                        // Alert the user
+                        alert("Copied the text");
+                    });
+
+                    // Append the button to the body of the HTML document
+                    document.body.appendChild(button);
+                })
+
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+
+
+        }
+    </script>
+</body>
+
+</html>

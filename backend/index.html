@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Translation System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div id="header">
+        <img id="logo" src="images/logo.png" alt="CulturaCast logo">
+        <h1>CulturaCast</h1>
+        <div>
+            <ul class="navbar">
+                <li><a href="#about-us">About</a></li>
+                <li><a href="#how-it-works">Working</a></li>
+                <li><a href="#services">Features</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#uses">Uses</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <img src="images/landing.jpg" alt="Intro Image" class="intro-image">
+        <div class="hero-content">
+            <h1>Make Your Video Speak Different Language</h1>
+            <p>Make videos accessible to everyone with video translations. Copy the transcribed subtitles of your video.
+                It's quick, easy, and completely online.</p>
+            <a href="#uploadForm"><button class="get-started-button">Get Started</button></a>
+        </div>
+    </div>
+
+
+    <div class="container">
+        <h2 id="formh2">Upload <br> the video here</h2>
+        <div class="form-section">
+            <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm" class="upload-form">
+                <label for="video">Select a video file:</label>
+                <input class="fileupload" type="file" id="video" name="video" accept="video/*" style="font-size: 16px;">
+                <h3 style="margin-left: 100px;">OR</h3>
+                <label for="youtubeUrl">Enter a YouTube link:</label>
+                <input type="url" class="urlfield" id="youtubeUrl" name="youtubeUrl">
+                <label for="languages">Select a language:</label>
+                <select class="button-67" id="languages" name="languages">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                    <option value="es">Spanish</option>
+                    <option value="de">German</option>
+                    <option value="ar">Arabic</option>
+                    <option value="ko">Korean</option>
+                    <option value="it">Italian</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ml">Malayalam</option>
+                </select>
+                <button class="button-50" type="submit" id="submitBtn">Upload</button>
+            </form>
+            <div id="loading" style="display: none;">
+                <div id="progress-box">
+                    <p>Loading... Please wait</p>
+                    <div id="progress-container">
+                        <div id="progress-bar"></div>
+                    </div>
+                    <span id="progress-text"></span>
+                </div>
+            </div>
+        </div>
+        <img src="images/img.jpg" alt="Form Image" class="form-image">
+    </div>
+
+    <section id="how-it-works">
+        <h2>How It Works</h2>
+        <a href="#formh2"><img src="images/Designer.png" alt="Designer illustration" id="img1"></a>
+        <p>Upload your video file or provide a YouTube URL. Select the languages you want to translate into, customize
+            settings, review and edit translations, then download or share your translated video.</p>
+    </section>
+    <section id="services">
+        <h2>Services</h2>
+        <a href="#formh2"><img src="images/services.jpg" alt="Services illustration" id="img1"></a>
+        <p>You can upload either a local video file or paste a YouTube URL, <br>and we provide subtitles in the required
+            language.</p>
+    </section>
+    <section id="uses">
+        <h2>Uses for Students, Teachers, and More</h2>
+        <a href="#formh2"><img src="images/creators.jpg" alt="Creators illustration" id="img1"></a>
+        <p>Students can access educational content in their preferred language, while teachers can reach a diverse
+            audience with their instructional videos. Our project promotes inclusivity and accessibility in education.
+        </p>
+    </section>
+    <section id="about-us">
+        <h2>About Us</h2>
+        <a href="#formh2"><img src="images/student.jpg" alt="Student illustration" id="img1"></a>
+        <p>We are passionate about breaking down language barriers and fostering global communication through innovative
+            technology. Our dedicated team is committed to providing seamless and accurate translation solutions
+            tailored to the needs of our users.</p>
+    </section>
+    <section id="faq">
+        <h2>FAQ</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <p class="faq-question">Q1: What is the purpose of this project?</p>
+                <p class="faq-answer">This project is designed to translate local as well as YouTube videos into
+                    different languages and
+                    provide translated audio and text files.</p>
+            </div>
+            <div class="faq-item">
+                <p class="faq-question">Q2: How does the video translation system work?</p>
+                <p class="faq-answer">The system extracts audio from the video, converts it to text, translates the
+                    text, and then converts the translated text back to speech.</p>
+            </div>
+
+            <div class="faq-item">
+                <p class="faq-question">Q3: Can the system handle videos with background music?</p>
+                <p class="faq-answer">The system performs best with videos that have clear audio. Background music may
+                    affect the accuracy of the transcription.</p>
+            </div>
+        </div>
+    </section>
+    <script>
+        const socket = io();
+
+        document.getElementById('uploadForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+            const formData = new FormData(this);
+            const socketId = socket.id;
+            formData.append('socketId', socketId);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    socket.on('progress', (data) => {
+                        const messageElement = document.getElementById('progress-text');
+                        const progressBar = document.getElementById('progress-bar');
+
+                        if (messageElement) {
+                            messageElement.innerText = data.message;
+                        } else {
+                            console.error('Element with id "progress-text" not found.');
+                        }
+
+
+                        if (data.message.includes("Extracting audio")) {
+                            progressBar.style.width = '20%';
+                        } else if (data.message.includes("Converting audio to text")) {
+                            progressBar.style.width = '40%';
+                        } else if (data.message.includes("Translating text")) {
+                            progressBar.style.width = '60%';
+                        } else if (data.message.includes("Converting text to speech")) {
+                            progressBar.style.width = '80%';
+                        } else if (data.message.includes("Merging audio with video")) {
+                            progressBar.style.width = '100%';
+                        }
+                    });
+
+                    socket.on('completed', () => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('submitBtn').disabled = false;
+                        window.location.href = '/out.html';
+                    });
+                } else {
+                    document.getElementById('loading').innerText = 'Upload failed. Please try again.';
+                    document.getElementById('submitBtn').disabled = false;
+                }
+            }).catch(error => {
+                document.getElementById('loading').innerText = 'An error occurred. Please try again.';
+                document.getElementById('submitBtn').disabled = false;
+            });
+        });
+        // document.querySelectorAll('.faq-question').forEach(question => {
+        //     question.addEventListener('click', () => {
+        //         console.log("clicked")
+        //         const answer = question.nextElementSibling;
+        //         answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+        //     });
+        // });
+    </script>
+</body>
+
+</html>
