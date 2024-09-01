@@ -92,7 +92,7 @@ async function uploadToFirebase(filePath, fileName, folder) {
 function handleVideoProcessing(fileName, language, socketId) {
     const firebaseUrl = `gs://culturacast-12b35.appspot.com/video/${fileName}`;
 
-    const pythonProcess = spawn('python', ['/backend/master.py', firebaseUrl, language, socketId]);
+    const pythonProcess = spawn('python', ['./master.py', firebaseUrl, language, socketId]);
 
     pythonProcess.stdout.on('data', (data) => {
         const message = data.toString();
