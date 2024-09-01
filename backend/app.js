@@ -15,7 +15,7 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require('../culturacast-12b35-firebase-adminsdk-jwgo7-dc4eeb957c.json'); // Replace with the path to your service account key
+const serviceAccount = require('./cultura.json'); // Replace with the path to your service account key
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
 // Your web app's Firebase configuration
