@@ -7,26 +7,31 @@ const body_parser = require('body-parser');
 const { spawn } = require('child_process');
 const { Server } = require('socket.io');
 const http = require('http');
+const admin = require('firebase-admin'); // Import Firebase Admin SDK
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
-const upload = multer({ dest: 'uploads/' });
+// Initialize Firebase Admin SDK
+const serviceAccount = require('./path/to/your/serviceAccountKey.json'); // Replace with the path to your service account key
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "culturacast-12b35.appspot.com" // Replace with your Firebase storage bucket name
+});
+
+const bucket = admin.storage().bucket();
+
+const upload = multer({ dest: 'video/' });
 
 app.use(body_parser.urlencoded({ extended: true }));
-//app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname)));
 
-//app.get('/', (req, res) => {
-    //res.sendFile(path.join(__dirname, 'index.html'));
-//});
-app.use(express.static(path.join(__dirname, '..')));
-
-// Route to serve the index.html
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'index.html'));
-})
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 const sanitizeFilename = (filename) => {
     return filename.replace(/[^a-z0-9]/gi, '_').toLowerCase();
@@ -41,15 +46,16 @@ app.post('/upload', upload.single('video'), async (req, res) => {
         try {
             const videoInfo = await ytdl.getInfo(youtubeUrl);
             const videoTitle = sanitizeFilename(videoInfo.videoDetails.title);
-            const filePath = `uploads/${videoTitle}.mp4`;
+            const tempFilePath = `uploads/${videoTitle}.mp4`;
 
             const videoStream = ytdl(youtubeUrl);
-            const writeStream = fs.createWriteStream(filePath);
+            const writeStream = fs.createWriteStream(tempFilePath);
 
             videoStream.pipe(writeStream);
 
-            writeStream.on('finish', () => {
-                handleVideoProcessing(filePath, language, socketId);
+            writeStream.on('finish', async () => {
+                await uploadToFirebase(tempFilePath, videoTitle); // Upload to Firebase Storage
+                handleVideoProcessing(videoTitle, language, socketId);
                 res.sendStatus(200);
             });
 
@@ -66,27 +72,34 @@ app.post('/upload', upload.single('video'), async (req, res) => {
         if (!req.file) {
             return res.status(400).send('No file uploaded.');
         }
-        const filePath = req.file.path;
-        handleVideoProcessing(filePath, language, socketId);
+        const tempFilePath = req.file.path;
+        const fileName = sanitizeFilename(req.file.originalname);
+
+        await uploadToFirebase(tempFilePath, fileName); // Upload to Firebase Storage
+        handleVideoProcessing(fileName, language, socketId);
         res.sendStatus(200);
     }
 });
 
+async function uploadToFirebase(filePath, fileName) {
+    const destination = `uploads/${fileName}`;
+    await bucket.upload(filePath, {
+        destination: destination,
+    });
+    console.log(`Uploaded ${fileName} to Firebase Storage.`);
+}
 
-function handleVideoProcessing(filePath, language, socketId) {
-    const pythonProcess = spawn('python', ['C:/Users/skfog/OneDrive/Desktop/project/backend/master.py', filePath, language, socketId]);
+function handleVideoProcessing(fileName, language, socketId) {
+    // Use Firebase Storage URL for processing
+    const firebaseUrl = `gs://culturacast-12b35.appspot.com/video/${fileName}`;
+
+    const pythonProcess = spawn('python', ['/backend/master.py', firebaseUrl, language, socketId]);
 
     pythonProcess.stdout.on('data', (data) => {
         const message = data.toString();
         console.log(`stdout: ${message}`);
         io.to(socketId).emit('progress', { message: message });
     });
-
-    // pythonProcess.stderr.on('data', () => {
-    //     // const error = `Error: ${data.toString()}`;
-    //     console.error(`stderr: ${error}`);
-    //     // io.to(socketId).emit('progress', { message: error });
-    // });
 
     pythonProcess.on('close', (code) => {
         const completionMessage = `Child process exited with code ${code}`;
@@ -96,9 +109,19 @@ function handleVideoProcessing(filePath, language, socketId) {
     });
 }
 
-app.get('/translated-video', (req, res) => {
-    const videoPath = 'C:/Users/skfog/OneDrive/Desktop/project/site/output/output_video.mp4';
-    res.sendFile(videoPath);
+app.get('/translated-video', async (req, res) => {
+    const videoPath = 'output/output_video.mp4'; // Firebase Storage path
+    const file = bucket.file(videoPath);
+
+    file.getSignedUrl({
+        action: 'read',
+        expires: '03-01-2025'
+    }).then((signedUrls) => {
+        res.redirect(signedUrls[0]);
+    }).catch((err) => {
+        console.error('Error getting signed URL:', err);
+        res.status(500).send('Error getting video');
+    });
 });
 
 app.get('/translated-text', (req, res) => {
