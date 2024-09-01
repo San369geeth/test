@@ -16,27 +16,6 @@ const PORT = process.env.PORT || 3000;
 
 // Initialize Firebase Admin SDK
 const serviceAccount = require('./cultura.json'); // Replace with the path to your service account key
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBpWFFyVZ9GefGS26_vPYzyXF9tMONMkJ0",
-  authDomain: "culturacast-12b35.firebaseapp.com",
-  projectId: "culturacast-12b35",
-  storageBucket: "culturacast-12b35.appspot.com",
-  messagingSenderId: "286209503315",
-  appId: "1:286209503315:web:fdbe4f9773d1fa7cf756a6",
-  measurementId: "G-YGJG2S3KSE"
-};
-
-// Initialize Firebase
-const appf = initializeApp(firebaseConfig);
-const analytics = getAnalytics(appf);
-
-// Initialize Firebase Storage
-const storage = getStorage(appf);
-
-// Now you can use `storage` to handle your files
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -45,7 +24,7 @@ admin.initializeApp({
 
 const bucket = admin.storage().bucket();
 
-const upload = multer({ dest: 'video/' });
+const upload = multer({ dest: 'temp_uploads/' });
 
 app.use(body_parser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
@@ -67,7 +46,7 @@ app.post('/upload', upload.single('video'), async (req, res) => {
         try {
             const videoInfo = await ytdl.getInfo(youtubeUrl);
             const videoTitle = sanitizeFilename(videoInfo.videoDetails.title);
-            const tempFilePath = `uploads/${videoTitle}.mp4`;
+            const tempFilePath = `temp_uploads/${videoTitle}.mp4`;
 
             const videoStream = ytdl(youtubeUrl);
             const writeStream = fs.createWriteStream(tempFilePath);
@@ -75,7 +54,7 @@ app.post('/upload', upload.single('video'), async (req, res) => {
             videoStream.pipe(writeStream);
 
             writeStream.on('finish', async () => {
-                await uploadToFirebase(tempFilePath, videoTitle); // Upload to Firebase Storage
+                await uploadToFirebase(tempFilePath, videoTitle, 'video'); // Upload to 'video' folder in Firebase Storage
                 handleVideoProcessing(videoTitle, language, socketId);
                 res.sendStatus(200);
             });
@@ -96,14 +75,14 @@ app.post('/upload', upload.single('video'), async (req, res) => {
         const tempFilePath = req.file.path;
         const fileName = sanitizeFilename(req.file.originalname);
 
-        await uploadToFirebase(tempFilePath, fileName); // Upload to Firebase Storage
+        await uploadToFirebase(tempFilePath, fileName, 'video'); // Upload to 'video' folder in Firebase Storage
         handleVideoProcessing(fileName, language, socketId);
         res.sendStatus(200);
     }
 });
 
-async function uploadToFirebase(filePath, fileName) {
-    const destination = `uploads/${fileName}`;
+async function uploadToFirebase(filePath, fileName, folder) {
+    const destination = `${folder}/${fileName}`;
     await bucket.upload(filePath, {
         destination: destination,
     });
@@ -111,7 +90,6 @@ async function uploadToFirebase(filePath, fileName) {
 }
 
 function handleVideoProcessing(fileName, language, socketId) {
-    // Use Firebase Storage URL for processing
     const firebaseUrl = `gs://culturacast-12b35.appspot.com/video/${fileName}`;
 
     const pythonProcess = spawn('python', ['/backend/master.py', firebaseUrl, language, socketId]);
@@ -131,7 +109,7 @@ function handleVideoProcessing(fileName, language, socketId) {
 }
 
 app.get('/translated-video', async (req, res) => {
-    const videoPath = 'output/output_video.mp4'; // Firebase Storage path
+    const videoPath = 'opvideo/output_video.mp4'; // Firebase Storage path for output video
     const file = bucket.file(videoPath);
 
     file.getSignedUrl({
@@ -146,7 +124,7 @@ app.get('/translated-video', async (req, res) => {
 });
 
 app.get('/translated-text', (req, res) => {
-    const textPath = path.join(__dirname, 'output', 'output_translated_text.txt');
+    const textPath = path.join(__dirname, 'texttranslate', 'output_translated_text.txt');
 
     fs.readFile(textPath, 'utf8', (err, data) => {
         if (err) {
